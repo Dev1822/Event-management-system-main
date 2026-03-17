@@ -275,6 +275,6 @@ Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more informa
 
 <br/>
 
-[![Node.js](https://skillicons.dev/icons?i=nodejs,express,mongodb,react,vite,tailwind,socketio,js)](https://skillicons.dev)
+[![Node.js](https://skillicons.dev/icons?i=nodejs,express,mongodb,react,vite,tailwind,js)](https://skillicons.dev)
 
 </div>
