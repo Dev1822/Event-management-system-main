@@ -43,7 +43,18 @@ export const listEvents = async (req, res) => {
     if (status) filter.status = status;
     if (organizer) filter.organizer = organizer;
     const events = await Event.find(filter).populate('organizer', 'name').sort({ date: 1 });
-    res.json({ events });
+
+    const eventsWithCount = await Promise.all(
+      events.map(async (event) => {
+        const registeredCount = await Registration.countDocuments({
+          event: event._id,
+          status: 'registered',
+        });
+        return { ...event.toObject(), registeredCount };
+      })
+    );
+
+    res.json({ events: eventsWithCount });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
