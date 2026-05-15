@@ -17,6 +17,7 @@ import CreateEvent from './pages/dashboard/CreateEvent';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import ThankYou from './pages/ThankYou';
 import { useAuth } from './context/AuthContext';
+import { useEffect, useState } from 'react';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -43,11 +44,22 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 const App = () => {
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if(darkMode){
+      document.documentElement.classList.add("dark");
+    }else{
+      document.documentElement.classList.remove("dark");
+    } 
+  },[darkMode]);
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col">
+      <div
+
+>
         {/* Header */}
-        <Header2 />
+        <Header2 darkMode={darkMode} setDarkMode={setDarkMode} />  
 
         <main className="flex-grow">
           <Routes>
