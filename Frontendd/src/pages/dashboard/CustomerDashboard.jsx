@@ -4,7 +4,11 @@ import { Calendar, MapPin, Ticket, X, Download } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { useAuth } from '../../context/AuthContext';
 import toast from "react-hot-toast";
-import { Link } from 'react-router-dom';
+import {
+  Link,
+  useNavigate,
+  useSearchParams
+} from 'react-router-dom';
 import { API_BASE_URL } from '../../config';
 import ConfirmationModal from "../../components/ui/confirmation-modal";
 
@@ -162,9 +166,10 @@ export default function CustomerDashboard() {
             console.log("Cancelled")
 
         } catch (error) {
-            console.error(error);
-            alert('Something went wrong');
-        }
+    console.error(error);
+
+    toast.error('Something went wrong');
+}
     };
 
 
@@ -598,8 +603,16 @@ const pastEvents = [
                                 ) : (
                                     <div className="grid grid-cols-1 gap-6">
                                         {availableEvents.map((evt, idx) => {
-                                            const isRegistered = registrations.some(r => r.status==="registered" && r.event?._id === evt._id);
-                                            return (
+                                           const isRegistered = registrations.some(
+    (r) =>
+        r.status === "registered" &&
+        r.event?._id === evt._id
+);
+
+const isEventFullBooked =
+    evt.registeredCount >= evt.capacity;
+
+return (
                                                 <motion.div
                                                     key={evt._id}
                                                     layout

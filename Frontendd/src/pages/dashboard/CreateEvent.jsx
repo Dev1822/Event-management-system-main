@@ -75,6 +75,15 @@ export default function CreateEvent() {
             setTagInput('');
         }
     };
+    
+const removeTag = (tagToRemove) => {
+  setFormData({
+    ...formData,
+    tags: formData.tags.filter(
+      (tag) => tag !== tagToRemove
+    ),
+  });
+};
 
  const handleSubmit = async (e) => {
     e.preventDefault();
