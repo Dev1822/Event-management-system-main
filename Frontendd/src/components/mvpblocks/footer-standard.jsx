@@ -244,6 +244,15 @@ export default function FooterStandard() {
           <div className="flex items-center gap-4">
 
             {data().bottomLinks.map(({ href, label }) => (
+              <a
+                key={label}
+                href={href}
+                onClick={(e) => handleLegalClick(e, href)}
+                className="text-xs text-slate-600 hover:text-rose-600 transition-colors cursor-pointer"
+              >
+                {label}
+              </a>
+            ))}
 
         {/* Divider */}
         <div className="h-px bg-slate-200 my-10"></div>

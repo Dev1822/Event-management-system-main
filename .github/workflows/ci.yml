@@ -194,6 +194,10 @@ jobs:
         with:
           node-version: "18"
 
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
       - name: Install frontend dependencies
         working-directory: Frontendd
         run: npm ci
@@ -202,12 +206,28 @@ jobs:
         working-directory: Frontendd
         run: npx playwright install --with-deps
 
+      - name: Start backend server
+        working-directory: backend
+        run: |
+          echo "Starting backend in background..."
+          JWT_SECRET="test-secret-key-for-ci" MONGO_URI="mongodb://127.0.0.1:27017/event_mgmt_test" PORT=5050 NODE_ENV=test npm start &
+
+      - name: Wait for backend to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:5050/api/events > /dev/null; then
+              echo "Backend server is ready!"
+              exit 0
+            fi
+            echo "Waiting for backend... ($i/30)"
+            sleep 2
+          done
+          echo "Backend server failed to start"
+          exit 1
+
       - name: Run Playwright tests
         working-directory: Frontendd
         run: npx playwright test
         env:
-          JWT_SECRET: "test-secret-key-for-ci"
-          MONGO_URI: "mongodb://127.0.0.1:27017/event_mgmt_test"
-          PORT: "5050"
-          NODE_ENV: "test"
           CLIENT_URL: "http://localhost:5173"
+          API_URL: "http://localhost:5050"

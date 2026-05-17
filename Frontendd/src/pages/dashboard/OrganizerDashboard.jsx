@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, MapPin, Users, Plus, Upload, Tag, Search, TrendingUp, IndianRupee, Clock, CheckCircle, XCircle, AlertCircle, Download, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -13,7 +12,6 @@ import { API_BASE_URL } from '../../config';
 
 export default function OrganizerDashboard() {
     const { user } = useAuth();
-    const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
@@ -46,7 +44,7 @@ export default function OrganizerDashboard() {
         if (user) {
             fetchMyEvents();
         }
-    }, [user]);
+    }, [user, fetchMyEvents]);
 
     const fetchMyEvents = async () => {
         try {
