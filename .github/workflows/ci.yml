@@ -262,9 +262,33 @@ jobs:
           cat ci-logs/backend.log 2>/dev/null || echo "No logs found"
           exit 1
 
+      - name: Start frontend dev server
+        working-directory: Frontendd
+        run: |
+          echo "Starting frontend dev server..."
+          npm run dev > ../ci-logs/frontend.log 2>&1 &
+          echo $! > ../ci-logs/frontend.pid
+
+      - name: Wait for frontend to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:5173 > /dev/null 2>&1; then
+              echo "✅ Frontend server is ready!"
+              exit 0
+            fi
+            echo "⏳ Waiting for frontend... ($i/30)"
+            sleep 2
+          done
+          echo "❌ Frontend server failed to start"
+          echo ""
+          echo "--- Frontend logs ---"
+          cat ci-logs/frontend.log 2>/dev/null || echo "No logs found"
+          exit 1
+
       - name: Run Playwright tests
         working-directory: Frontendd
         run: npx playwright test --reporter=list
         env:
           CLIENT_URL: "http://localhost:5173"
           API_URL: "http://localhost:5050"
+          CI: "true"
