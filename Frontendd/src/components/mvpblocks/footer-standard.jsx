@@ -4,16 +4,14 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { LegalModal } from "../ui/legal-modal";
 import { legalContent } from "../../data/legalContent";
-import { Button } from "../ui/button";
 import {
   Github,
   Linkedin,
   Twitter,
-  ArrowDownLeft,
   MessageCircle,
   Zap,
+  Heart,
 } from "lucide-react";
-import { Input } from "../ui/input";
 
 const data = () => ({
   navigation: {
@@ -23,10 +21,7 @@ const data = () => ({
     ],
 
     company: [
-      { name: "About", href: "/about-us" },
-      // { name: "Blog", href: "/blog" },
-
-      // { name: "Careers", href: "/careers" },
+      { name: "About", href: "/about" },
       { name: "Contact", href: "/contact" },
     ],
 
@@ -63,9 +58,7 @@ export default function FooterStandard() {
 
   const handleLegalClick = (e, href) => {
     e.preventDefault();
-
-    const key = href.replace("/", "");
-
+    const key = href.replace('/', '');
     if (legalContent[key]) {
       setActiveModal(key);
     }
@@ -210,25 +203,27 @@ export default function FooterStandard() {
           {/* Navigation */}
           <div className="grid w-full grid-cols-2 items-start justify-between gap-8 px-5 lg:col-span-3">
             {["product", "company", "resources", "legal"].map((section) => (
-              <div key={section} className="w-full">
-                <h3 className="border-primary mb-4 -ml-5 border-l-2 pl-5 text-sm font-semibold tracking-wider uppercase">
-                  {section.charAt(0).toUpperCase() + section.slice(1)}
-                </h3>
-                <ul className="space-y-3">
+              <div key={section} className="space-y-3">
+                <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wide">
+                  {section === "product" && "Product"}
+                  {section === "company" && "Company"}
+                  {section === "resources" && "Resources"}
+                  {section === "legal" && "Legal"}
+                </h4>
+                <ul className="space-y-2">
                   {data().navigation[section].map((item) => (
                     <li key={item.name}>
                      <Link
                         to={item.href}
                         onClick={(e) => {
-                         if (section === 'legal') {
-                         handleLegalClick(e, item.href);
-                       }
-                       }}
-                        className="group text-muted-foreground hover:text-foreground decoration-primary -ml-5 inline-flex items-center gap-2 underline-offset-8 transition-all duration-500 hover:pl-5 hover:underline pointer-events-auto cursor-pointer">
-                       <ArrowDownLeft className="text-primary rotate-[225deg] opacity-30 transition-all duration-500 group-hover:scale-150 group-hover:opacity-100 sm:group-hover:rotate-[225deg] md:rotate-0" />
-                       {item.name}
-                    </Link>
-                  </li>
+                          if (section === 'legal') {
+                            handleLegalClick(e, item.href);
+                          }
+                        }}
+                        className="text-xs text-slate-600 hover:text-rose-600 transition-colors cursor-pointer">
+                        {item.name}
+                      </a>
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -250,28 +245,53 @@ export default function FooterStandard() {
 
             {data().bottomLinks.map(({ href, label }) => (
 
+        {/* Divider */}
+        <div className="h-px bg-slate-200 my-10"></div>
+
+        {/* Bottom Row - Social & Links */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12">
+          {/* Social Links - Left */}
+          <div className="lg:col-span-4 flex items-center gap-3">
+            {data().socialLinks.map(({ icon: IconComponent, label, href }) => (
               <a
-                key={href}
+                key={label}
                 href={href}
-                onClick={(e) => handleLegalClick(e, href)}
-                className="hover:text-foreground cursor-pointer"
-              >
-
-                {label}
-
+                className="p-1.5 text-slate-600 hover:text-rose-600 transition-colors"
+                aria-label={label}>
+                <IconComponent className="h-4 w-4" />
               </a>
 
             ))}
 
           </div>
 
+          {/* Privacy & Terms Links - Right */}
+          <div className="lg:col-span-8 flex justify-end gap-4">
+            <a
+              href="/privacy"
+              onClick={(e) => handleLegalClick(e, '/privacy')}
+              className="text-xs text-slate-600 hover:text-rose-600 transition-colors cursor-pointer">
+              Privacy
+            </a>
+            <a
+              href="/terms"
+              onClick={(e) => handleLegalClick(e, '/terms')}
+              className="text-xs text-slate-600 hover:text-rose-600 transition-colors cursor-pointer">
+              Terms
+            </a>
+          </div>
         </div>
 
-        <span className="from-primary/20 absolute inset-x-0 bottom-0 left-0 -z-10 h-1/3 w-full bg-gradient-to-t" />
-
+        {/* Centered Copyright */}
+        <div className="flex justify-center">
+          <p className="text-xs text-slate-600 flex items-center gap-1">
+            © {currentYear} Event.One
+            <Heart className="h-3 w-3 text-rose-500 fill-rose-500" />
+          </p>
+        </div>
       </div>
 
-      {/* Modal */}
+      {/* Legal Modal */}
       <LegalModal
         isOpen={!!activeModal}
         onClose={() => setActiveModal(null)}
