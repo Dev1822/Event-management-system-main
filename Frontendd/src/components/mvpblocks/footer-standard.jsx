@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { LegalModal } from "../ui/legal-modal";
 import { legalContent } from "../../data/legalContent";
 import {
@@ -86,8 +87,8 @@ export default function FooterStandard() {
                 <ul className="space-y-2">
                   {data().navigation[section].map((item) => (
                     <li key={item.name}>
-                      <a
-                        href={item.href}
+                     <Link
+                        to={item.href}
                         onClick={(e) => {
                           if (section === 'legal') {
                             handleLegalClick(e, item.href);
