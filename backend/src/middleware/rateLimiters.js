@@ -1,9 +1,16 @@
 import rateLimit from "express-rate-limit";
 
-export const authRateLimiter = rateLimit({
-  windowMs: process.env.AUTH_RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000,
+// Helper to parse numeric env vars with a fallback
+const parseEnvInt = (envVar, fallback) => {
+  if (typeof envVar === 'undefined' || envVar === null || envVar === '') return fallback;
+  const n = Number.parseInt(envVar, 10);
+  return Number.isNaN(n) ? fallback : n;
+};
 
-  max: process.env.AUTH_RATE_LIMIT_MAX || 10,
+export const authRateLimiter = rateLimit({
+  windowMs: parseEnvInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
+
+  max: parseEnvInt(process.env.AUTH_RATE_LIMIT_MAX, 10),
 
   message: {
     success: false,
@@ -15,10 +22,9 @@ export const authRateLimiter = rateLimit({
 });
 
 export const registrationRateLimiter = rateLimit({
-  windowMs:
-    process.env.REGISTRATION_RATE_LIMIT_WINDOW_MS || 60 * 1000,
+  windowMs: parseEnvInt(process.env.REGISTRATION_RATE_LIMIT_WINDOW_MS, 60 * 1000),
 
-  max: process.env.REGISTRATION_RATE_LIMIT_MAX || 5,
+  max: parseEnvInt(process.env.REGISTRATION_RATE_LIMIT_MAX, 5),
 
   message: {
     success: false,

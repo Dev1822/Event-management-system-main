@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { signup, login, me, updateProfile } from '../controllers/authController.js';
 import { authenticate } from '../middleware/auth.js';
+import { authRateLimiter } from '../middleware/rateLimiters.js';
 import {
   signupValidation,
   loginValidation,
@@ -13,6 +14,7 @@ router.post(
   signupValidation,
   validate,
   signup
+);
 const parsedAuthWindowMs = Number.parseInt(
   process.env.AUTH_RATE_LIMIT_WINDOW_MS ?? '',
   10
@@ -24,6 +26,7 @@ router.post(
   validate,
   login
 );
+
 router.post('/signup', authRateLimiter, signup);
 router.post('/login', authRateLimiter, login);
 

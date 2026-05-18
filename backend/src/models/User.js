@@ -6,12 +6,19 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, minlength: 6 },
-    role: { type: String, enum: ['attendee', 'organizer', 'admin'], default: 'attendee' },
+    role: { type: String, enum: ['customer', 'organizer', 'admin'], default: 'customer' },
     isBlocked: { type: Boolean, default: false },
     points: { type: Number, default: 0 },
     interests: [{ type: String }],
     avatarUrl: { type: String },
     phoneNumber: { type: String, trim: true },
+    savedEvents:{
+      type:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Event'
+      }],
+      default:[]
+    }
   },
   { timestamps: true }
 );

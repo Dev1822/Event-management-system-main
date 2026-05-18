@@ -13,9 +13,14 @@ export const approveEvent = async (req, res) => {
 
 export const rejectEvent = async (req, res) => {
   try {
-    const event = await Event.findByIdAndDelete(req.params.id);
+    const {eventId} = req.params;
+    const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ message: 'Not found' });
-    res.json({ message: 'Event rejected and removed', eventId: req.params.id });
+
+    // When Event Reject then Remove the Event from all users savedEvents and then delete the event
+    await User.updateMany( {}, { $pull: { savedEvents: eventId  }},{new:true});
+    await Event.findByIdAndDelete(eventId);
+    res.json({success:true, message: 'Event rejected and removed', eventId});
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
