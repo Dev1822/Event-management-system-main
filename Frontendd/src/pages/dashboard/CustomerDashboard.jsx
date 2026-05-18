@@ -59,23 +59,6 @@ export default function CustomerDashboard() {
             setLoading(false);
         }
     };
-
-    const fetchRegistrations = async () => {
-        try {
-            setLoading(true);
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/registrations/me`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setRegistrations(data.registrations || []);
-            }
-        } catch (error) {
-            console.error("Failed to fetch registrations", error);
-        } finally {
-            setLoading(false);
-        }
     };
 
    const handleRegister = async (eventId) => {

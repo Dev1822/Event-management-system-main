@@ -237,6 +237,7 @@ export default function FooterStandard() {
         title={activeModal ? legalContent[activeModal].title : ""}
         content={activeModal ? legalContent[activeModal].content : ""}
       />
+    </footer>
 
       {/* Animation Styles */}
       <style>{`
