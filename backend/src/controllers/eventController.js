@@ -161,7 +161,6 @@ export const updateEvent = async (req, res) => {
       { new: true }
     );
 
-    // Delete old poster after successful update
     if (update.posterUrl && oldEvent.posterUrl) {
       await deleteFromCloudinary(oldEvent.posterUrl);
     }
@@ -188,7 +187,6 @@ export const deleteEvent = async (req, res) => {
       });
     }
 
-    // Clean up poster
     if (event.posterUrl) {
       await deleteFromCloudinary(event.posterUrl);
     }
@@ -203,7 +201,6 @@ export const deleteEvent = async (req, res) => {
     });
   }
 };
-
 export const listEvents = async (req, res) => {
   try {
     const { q, category, status, organizer } = req.query;
@@ -258,7 +255,6 @@ export const listEvents = async (req, res) => {
     });
   }
 };
-
 export const getPopularTags = async (req, res) => {
   try {
     const tags = await Event.aggregate([
@@ -267,38 +263,28 @@ export const getPopularTags = async (req, res) => {
           status: 'approved',
         },
       },
-
       {
         $unwind: '$tags',
       },
-
       {
         $group: {
           _id: '$tags',
           count: { $sum: 1 },
         },
       },
-
       {
         $sort: {
           count: -1,
         },
       },
-
       {
         $limit: 20,
       },
-
-      {
-        $project: {
-          _id: 0,
-          tag: '$_id',
-          count: 1,
-        },
-      },
     ]);
 
-    res.json({ tags });
+    res.json({
+      tags,
+    });
 
   } catch (err) {
     res.status(500).json({
