@@ -255,6 +255,7 @@ export default function CustomerDashboard() {
                           <div className="flex justify-between items-start"><h3 className="text-base font-semibold text-foreground">{reg.event?.title}</h3><span className={`inline-flex items-center text-xs px-2 py-1 rounded-full border ${reg.status === 'attended' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : 'bg-secondary text-muted-foreground'}`}>{reg.status === 'attended' ? 'Attended' : 'Completed'}</span></div>
                           <p className="text-muted-foreground text-xs mt-1">{reg.event?.date ? new Date(reg.event.date).toLocaleDateString() : 'TBA'} • {reg.event?.location}</p>
                         </div>
+                        </div>
                       </motion.div>
                     ))}
                   </div>
