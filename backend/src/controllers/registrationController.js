@@ -4,6 +4,7 @@ import { generateQRCodeDataUrl } from '../utils/qrcode.js';
 import { sendEmail } from '../utils/email.js';
 import path from 'path';
 import { createObjectCsvWriter } from 'csv-writer';
+import { emitRegistrationCount } from '../services/socket.js';
 
 
 export const registerForEvent = async (req, res) => {
@@ -72,7 +73,11 @@ export const registerForEvent = async (req, res) => {
       }
     }
 
-    // Send email
+    emitRegistrationCount(
+      updatedEvent._id,
+      updatedEvent.registeredCount,
+    );
+
     try {
       await sendEmail({
         to: req.user.email,
@@ -341,6 +346,7 @@ export const cancelRegistration = async (req, res) => {
     await registration.save();
     res.status(200).json({ message: 'Registration cancelled successfully', registration });
   } catch (error) {
+    console.error('ERROR:', error);
     res.status(500).json({ message: error.message });
   }
 };
