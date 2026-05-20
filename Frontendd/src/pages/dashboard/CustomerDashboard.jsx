@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, MapPin, Ticket } from 'lucide-react';
 import {
@@ -12,9 +12,8 @@ import { useAuth } from '../../context/AuthContext';
 
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { API_BASE_URL } from '../../config';
-import ConfirmationModal from "../../components/ui/confirmation-modal";
+import ConfirmationModal from '../../components/ui/confirmation-modal';
 import { useDebounce } from '../../hooks/useDebounce';
-
 import { generateCertificate } from '../../utils/generateCertificate';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -73,7 +72,7 @@ export default function CustomerDashboard() {
     }
   }, [searchParams]);
 
-const fetchAvailableEvents = async () => {
+  const fetchAvailableEvents = useCallback(async () => {
     try {
       if (mountedRef.current) setLoading(true);
       const token = localStorage.getItem('token');
@@ -87,32 +86,37 @@ const fetchAvailableEvents = async () => {
             (evt) => new Date(evt.date) >= new Date()
         );
 
+      if (mountedRef.current) {
         setAvailableEvents(upcoming);
-
+      }
     } catch (error) {
-        console.error('Failed to fetch events:', error);
+      console.error('Failed to fetch events:', error);
     } finally {
+      if (mountedRef.current) {
         setIsFetching(false);
         setLoading(false);
+      }
     }
-};
-const fetchRegistrations = async () => {
+  }, [searchParams]);
+
+  const fetchRegistrations = useCallback(async () => {
     try {
-        setLoading(true);
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${API_BASE_URL}/api/registrations/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.ok) {
-            const data = await res.json();
-            setRegistrations(data.registrations || []);
-        }
+      if (mountedRef.current) setLoading(true);
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/api/registrations/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.ok && mountedRef.current) {
+        const data = await res.json();
+        setRegistrations(data.registrations || []);
+      }
     } catch (error) {
-        console.error("Failed to fetch registrations", error);
+      console.error('Failed to fetch registrations', error);
     } finally {
-        setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
-};
+  }, []);
 
 const handleRegister = async (eventId) => {
     try {
@@ -139,9 +143,9 @@ const handleRegister = async (eventId) => {
       console.error(err);
       alert('Something went wrong');
     }
-};
+  };
 
-const handleCancelRegistration = async () => {
+  const handleCancelRegistration = async () => {
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(
@@ -167,9 +171,9 @@ const handleCancelRegistration = async () => {
       console.error(err);
       alert('Something went wrong');
     }
-};
+  };
 
-const handleDownloadTicket = async () => {
+  const handleDownloadTicket = async () => {
     try {
       if (!ticketRef.current || !selectedTicket) return;
       const canvas = await html2canvas(ticketRef.current, {
@@ -228,15 +232,15 @@ const handleDownloadTicket = async () => {
     resource: event,
   }));
 
-if (loading) {
+  if (loading) {
     return (
-        <div className="flex items-center justify-center min-h-screen bg-[#09090b]">
-            <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-[#09090b]">
+        <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+      </div>
     );
-}
+  }
 
-return (
+  return (
     <div className="min-h-screen bg-background text-foreground pt-32 px-4 sm:px-6 lg:px-8 font-sans selection:bg-purple-500/30 relative overflow-hidden">
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="from-primary/20 via-background to-background absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))]" />
@@ -691,13 +695,13 @@ return (
                                 )}
                               </div>
                             </div>
-                            <Button onClick={handleDownloadTicket} className="w-full bg-rose-600 hover:bg-rose-700 text-white">
-                                <Download className="w-4 h-4 mr-2" />
-                                Download / Print Ticket
-                            </Button>
-                        </div>
-                    </motion.div>
-                </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
         </AnimatePresence>
 
@@ -713,5 +717,5 @@ return (
         </div>
       </div>
     </div>
-);
+  );
 }
