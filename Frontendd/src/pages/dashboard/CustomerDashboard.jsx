@@ -19,6 +19,8 @@ export default function CustomerDashboard() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedRegistrationId, setSelectedRegistrationId] = useState(null);
 
+    const [refundInfo, setRefundInfo] = useState(null);
+
     useEffect(() => {
         if (activeTab === 'Browse Events') {
             fetchAvailableEvents();
@@ -109,7 +111,7 @@ export default function CustomerDashboard() {
                 );
             }
 
-            
+
 
             // Update UI instantly
             setRegistrations((prev) =>
@@ -138,6 +140,42 @@ export default function CustomerDashboard() {
 
     const handleDownloadTicket = () => {
         window.print();
+    };
+
+    const fetchRefundPolicy = async (registrationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(
+                `${API_BASE_URL}/api/registrations/${registrationId}/refund-policy`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type":
+                            "application/json",
+                    },
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(
+                    data.message ||
+                    "Failed to fetch refund policy"
+                );
+            }
+
+            setRefundInfo(data);
+
+        } catch (error) {
+            console.error(
+                "Failed to fetch refund policy:",
+                error
+            );
+
+            return null;
+        }
     };
 
     // Filter registrations based on date
@@ -212,7 +250,7 @@ export default function CustomerDashboard() {
                         </h2>
                         {activeTab === 'Upcoming Tickets' && (
                             <span className="px-3 py-1 bg-rose-500/10 text-rose-500 text-xs font-medium rounded-full border border-rose-500/20">
-                                {upcomingEvents.filter(event => event.status!="cancelled").length} Active
+                                {upcomingEvents.filter(event => event.status != "cancelled").length} Active
                             </span>
                         )}
                         {activeTab === 'Past Events' && (
@@ -326,7 +364,17 @@ export default function CustomerDashboard() {
                                                             {/* Cancel Registration */}
                                                             {
                                                                 reg.status === "cancelled" ? (
-                                                                    null
+                                                                    // After cancellation, show refund status in the Customer Dashboard: 'Refund Initiated', 'Refunded'
+                                                                    // Refund timeline: ''Refund of ₹X initiated — typically takes 5-7 business days''
+
+                                                                    reg.refundStatus == "pending" ? (
+                                                                        <p className='text-sm text-yellow-500 font-bold'>Refund of ₹{reg.refundAmount} initiated — typically takes 5-7 business days</p>
+
+                                                                    ) : (
+                                                                        reg.refundStatus == "processed" ? (<p className='text-sm text-green-500 font-bold'>Amount Refunded of ₹{reg.refundAmount}</p>
+                                                                        ) : (null)
+                                                                    )
+
                                                                 ) : (
                                                                     <>
                                                                         <Button
@@ -339,11 +387,13 @@ export default function CustomerDashboard() {
                                                                         <Button
                                                                             variant="outline"
                                                                             className="text-xs h-8 bg-rose-600 border-rose-500/30 text-white hover:bg-red-400"
-                                                                            onClick={() => {
+                                                                            onClick={async () => {
                                                                                 setSelectedRegistrationId(
                                                                                     reg._id
                                                                                 );
+                                                                                await fetchRefundPolicy(reg._id);
                                                                                 setIsModalOpen(true);
+
                                                                             }}
                                                                         >
                                                                             Cancel Registration
@@ -448,7 +498,7 @@ export default function CustomerDashboard() {
                                 ) : (
                                     <div className="grid grid-cols-1 gap-6">
                                         {availableEvents.map((evt, idx) => {
-                                            const isRegistered = registrations.some(r => r.status==="registered" && r.event?._id === evt._id);
+                                            const isRegistered = registrations.some(r => r.status === "registered" && r.event?._id === evt._id);
                                             return (
                                                 <motion.div
                                                     key={evt._id}
@@ -617,10 +667,12 @@ export default function CustomerDashboard() {
                 onClose={() => {
                     setIsModalOpen(false);
                     setSelectedRegistrationId(null);
+                    setRefundInfo(null)
                 }}
+                refundInfo={refundInfo}
                 onConfirm={handleCancelRegistration}
                 title="Cancel Registration"
-                message="Are you sure you want to cancel your registration? This action cannot be undone."
+            // message="Are you sure you want to cancel your registration? This action cannot be undone."
             />
         </div>
 
