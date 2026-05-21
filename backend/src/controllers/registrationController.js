@@ -268,30 +268,30 @@ export const checkInParticipant =
         });
       }
 
-      const registration =
-        await Registration.findOneAndUpdate(
-          {
-            user: req.body.userId,
-            event: req.params.id,
-          },
-          {
-            status,
-            checkedInAt:
-              status === 'attended'
-                ? new Date()
-                : undefined,
-          },
-          {
-            new: true,
-          }
-        );
+      const registration = await Registration.findOne({
+        user: req.body.userId,
+        event: req.params.id,
+      });
 
       if (!registration) {
         return res.status(404).json({
-          message:
-            'Registration not found',
+          message: 'Registration not found',
         });
       }
+
+      if (status === 'attended' && registration.status === 'attended') {
+        return res.status(400).json({
+          message: 'Attendee already checked in',
+        });
+      }
+
+      registration.status = status;
+      if (status === 'attended') {
+        registration.checkedInAt = new Date();
+      } else {
+        registration.checkedInAt = undefined;
+      }
+      await registration.save();
 
       // Promote waitlisted user
       if (status === 'cancelled') {

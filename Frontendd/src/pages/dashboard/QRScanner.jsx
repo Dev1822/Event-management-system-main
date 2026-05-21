@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
+import { API_BASE_URL } from '../../config';
 
 export default function QRScanner() {
   const [feedback, setFeedback] = useState(null);
@@ -34,7 +35,7 @@ export default function QRScanner() {
               const token = localStorage.getItem('token');
 
               const response = await fetch(
-                `http://localhost:5050/api/registrations/${parsed.eventId}/checkin`,
+                `${API_BASE_URL}/api/registrations/${parsed.eventId}/checkin`,
                 {
                   method: 'POST',
                   headers: {
