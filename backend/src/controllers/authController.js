@@ -147,3 +147,99 @@ export const googleAuth = async (req, res) => {
     return handleAuthError(res, err);
   }
 };
+
+export const githubAuth = async (req, res) => {
+  try {
+    const { code, role } = req.body;
+    
+    if (!code) {
+      return res.status(400).json({ message: 'GitHub authorization code is required' });
+    }
+
+    // 1. Exchange code for access token
+    const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code
+      })
+    });
+    const tokenData = await tokenRes.json();
+    
+    if (tokenData.error) {
+      return res.status(400).json({ message: tokenData.error_description || 'Invalid GitHub code' });
+    }
+    
+    const accessToken = tokenData.access_token;
+
+    // 2. Fetch user profile from GitHub
+    const userRes = await fetch('https://api.github.com/user', {
+      headers: { 
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json'
+      }
+    });
+    
+    if (!userRes.ok) {
+      return res.status(400).json({ message: 'Failed to fetch GitHub user' });
+    }
+    
+    const githubUser = await userRes.json();
+    let email = githubUser.email;
+    const { name, avatar_url, login } = githubUser;
+    
+    // 3. If email is private, fetch from emails endpoint
+    if (!email) {
+      const emailRes = await fetch('https://api.github.com/user/emails', {
+        headers: { 
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json'
+        }
+      });
+      const emails = await emailRes.json();
+      const primaryEmail = emails.find(e => e.primary) || emails[0];
+      if (primaryEmail) {
+        email = primaryEmail.email;
+      }
+    }
+    
+    if (!email) {
+      return res.status(400).json({ message: 'No public or private email found on GitHub account' });
+    }
+    
+    let user = await User.findOne({ email });
+    if (!user) {
+      const generatedPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
+      user = await User.create({
+        name: name || login,
+        email,
+        password: generatedPassword,
+        role: role || 'attendee',
+        avatarUrl: avatar_url
+      });
+    } else if (user.isBlocked) {
+      return res.status(403).json({ message: 'User is blocked' });
+    }
+    
+    const token = generateJwtToken({ id: user._id, role: user.role, name: user.name });
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        points: user.points,
+        phoneNumber: user.phoneNumber,
+        avatarUrl: user.avatarUrl
+      }
+    });
+  } catch (err) {
+    return handleAuthError(res, err);
+  }
+};

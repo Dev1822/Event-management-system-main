@@ -5,7 +5,8 @@ import {
   login,
   me,
   updateProfile,
-  googleAuth
+  googleAuth,
+  githubAuth
 } from '../controllers/authController.js';
 
 import { authenticate } from '../middleware/auth.js';
@@ -36,6 +37,7 @@ router.post(
 );
 
 router.post('/google', authRateLimiter, googleAuth);
+router.post('/github', authRateLimiter, githubAuth);
 
 // User Routes
 router.get('/me', authenticate, me);
