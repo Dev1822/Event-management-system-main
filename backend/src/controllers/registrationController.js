@@ -296,6 +296,9 @@ export const promoteFromWaitlist = async (eventId) => {
     .sort({ createdAt: 1 })
     .populate('user')
     .populate('event');
+    if (!nextRegistration) {
+  return;
+}
 
     const payload = JSON.stringify({
       userId:

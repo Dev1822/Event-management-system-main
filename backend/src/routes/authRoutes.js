@@ -11,6 +11,7 @@ import {
 
 import { authenticate } from '../middleware/auth.js';
 import { authRateLimiter } from '../middleware/rateLimiters.js';
+
 import {
   signupValidation,
   loginValidation,
@@ -41,6 +42,11 @@ router.post('/github', authRateLimiter, githubAuth);
 
 // User Routes
 router.get('/me', authenticate, me);
-router.put('/profile', authenticate, updateProfile);
+
+router.put(
+  '/profile',
+  authenticate,
+  updateProfile
+);
 
 export default router;
