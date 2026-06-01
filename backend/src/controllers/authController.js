@@ -96,3 +96,54 @@ export const updateProfile = async (req, res) => {
     return handleAuthError(res, err);
   }
 };
+
+export const googleAuth = async (req, res) => {
+  try {
+    const { access_token, role } = req.body;
+    
+    if (!access_token) {
+      return res.status(400).json({ message: 'Access token is required' });
+    }
+
+    const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${access_token}` }
+    });
+    
+    if (!googleRes.ok) {
+      return res.status(400).json({ message: 'Invalid Google token' });
+    }
+    
+    const googleUser = await googleRes.json();
+    const { email, name, picture } = googleUser;
+    
+    let user = await User.findOne({ email });
+    if (!user) {
+      const generatedPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
+      user = await User.create({
+        name,
+        email,
+        password: generatedPassword,
+        role: role || 'attendee',
+        avatarUrl: picture
+      });
+    } else if (user.isBlocked) {
+      return res.status(403).json({ message: 'User is blocked' });
+    }
+    
+    const token = generateJwtToken({ id: user._id, role: user.role, name: user.name });
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        points: user.points,
+        phoneNumber: user.phoneNumber,
+        avatarUrl: user.avatarUrl
+      }
+    });
+  } catch (err) {
+    return handleAuthError(res, err);
+  }
+};

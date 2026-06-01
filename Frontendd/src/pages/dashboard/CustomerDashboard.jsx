@@ -48,7 +48,6 @@ export default function CustomerDashboard() {
   const ticketRef = useRef(null);
   const mountedRef = useRef(true);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   const [availableEvents, setAvailableEvents] = useState([]);
   const [viewMode, setViewMode] = useState('grid');
@@ -80,33 +79,6 @@ export default function CustomerDashboard() {
       console.error('Failed to fetch events', error);
     } finally {
       if (mountedRef.current) setLoading(false);
-    }
-  }, [searchParams]);
-
-  const fetchAvailableEvents = useCallback(async () => {
-    try {
-      if (mountedRef.current) setLoading(true);
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE_URL}/api/registrations/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok && mountedRef.current) {
-        const data = await res.json();
-
-        const upcoming = (data.events || []).filter(
-            (evt) => new Date(evt.date) >= new Date()
-        );
-
-      if (mountedRef.current) {
-        setAvailableEvents(upcoming);
-      }
-    } catch (error) {
-      console.error('Failed to fetch events:', error);
-    } finally {
-      if (mountedRef.current) {
-        setIsFetching(false);
-        setLoading(false);
-      }
     }
   }, [searchParams]);
 

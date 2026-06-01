@@ -9,9 +9,6 @@ import adminRoutes from './routes/adminRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
 import http from 'http';
 import helmet from 'helmet';
-import app from './app.js';
-import cors from 'cors';
-import helmet from 'helmet';
 import cors from 'cors';
 import morgan from 'morgan';
 import compression from 'compression';
@@ -24,16 +21,7 @@ import { env } from './config/env.js';
 import { connectDB } from './config/db.js';
 
 import { initSocket } from './services/socket.js';
- 
 
-import authRoutes from './routes/authRoutes.js';
-import eventRoutes from './routes/eventRoutes.js';
-import registrationRoutes from './routes/registrationRoutes.js';
-import reviewRoutes from './routes/reviewRoutes.js';
-import adminRoutes from './routes/adminRoutes.js';
-import statsRoutes from './routes/statsRoutes.js';
-
-import { initSocket } from './services/socket.js';
 
 const server = http.createServer(app);
 
@@ -63,7 +51,7 @@ app.use((err, req, res, next) => {
 });
 
 async function start() {
-  //await connectDB();
+  await connectDB();
 
   server.listen(env.port, () => {
     console.log(`Server running on http://localhost:${env.port}`);

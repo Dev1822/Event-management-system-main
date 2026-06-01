@@ -4,7 +4,8 @@ import {
   signup,
   login,
   me,
-  updateProfile
+  updateProfile,
+  googleAuth
 } from '../controllers/authController.js';
 
 import { authenticate } from '../middleware/auth.js';
@@ -33,6 +34,8 @@ router.post(
   validate,
   login
 );
+
+router.post('/google', authRateLimiter, googleAuth);
 
 // User Routes
 router.get('/me', authenticate, me);

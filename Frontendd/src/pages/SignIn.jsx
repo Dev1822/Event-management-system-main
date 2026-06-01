@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import { useGoogleLogin } from '@react-oauth/google';
+import { FcGoogle } from "react-icons/fc";
 
 import { API_BASE_URL } from "../config";
 
@@ -55,6 +57,35 @@ const handleSubmit = async (e) => {
         setIsLoading(false);
     }
 };
+
+    const googleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            const loadingToast = toast.loading("Signing in with Google...");
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ access_token: tokenResponse.access_token })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    login(data.token, data.user);
+                    toast.success("Login successful!", { id: loadingToast });
+                    navigate('/');
+                } else {
+                    toast.error(data.message || 'Login failed', { id: loadingToast });
+                }
+            } catch (error) {
+                console.error("Google login error", error);
+                toast.error("Something went wrong", { id: loadingToast });
+            }
+        },
+        onError: errorResponse => {
+            console.error("Google login failed", errorResponse);
+            toast.error("Google sign-in was cancelled or failed.");
+        }
+    });
+
 
     return (
         <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
@@ -166,9 +197,25 @@ const handleSubmit = async (e) => {
                         </form>
 
                         {/* Divider */}
+                        <div className="relative my-6 z-10">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-300"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-white/40 text-gray-600 rounded-full">Or continue with</span>
+                            </div>
+                        </div>
 
-
-                        {/* Sign Up Link */}
+                        {/* Google Sign In Button */}
+                        <button
+                            type="button"
+                            onClick={() => googleLogin()}
+                            disabled={isLoading}
+                            className="w-full flex items-center justify-center space-x-3 py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md relative z-10 mb-6"
+                        >
+                            <FcGoogle className="h-6 w-6" />
+                            <span className="font-semibold">Continue with Google</span>
+                        </button>                        {/* Sign Up Link */}
                         <div className="mt-8 text-center text-sm relative z-10">
                             <span className="text-gray-600">Don't have an account? </span>
                             <Link
