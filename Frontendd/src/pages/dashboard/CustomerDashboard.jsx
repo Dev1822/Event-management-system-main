@@ -129,36 +129,6 @@ export default function CustomerDashboard() {
     }
   }, [searchParams]);
 
-<<<<<<< HEAD
-=======
-  const fetchAvailableEvents = useCallback(async () => {
-    try {
-      if (mountedRef.current) setLoading(true);
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE_URL}/api/registrations/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok && mountedRef.current) {
-        const data = await res.json();
-
-        const upcoming = (data.events || []).filter(
-            (evt) => new Date(evt.date) >= new Date()
-        );
-
-      if (mountedRef.current) {
-        setAvailableEvents(upcoming);
-      }
-    }
-    } catch (error) {
-      console.error("Failed to fetch events:", error);
-    } finally {
-      if (mountedRef.current) {
-        setIsFetching(false);
-        setLoading(false);
-      }
-    }
-  }, [searchParams]);
-
   const fetchSavedEvents = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
@@ -182,8 +152,6 @@ export default function CustomerDashboard() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSavedEvents();
   }, [fetchSavedEvents]);
-
->>>>>>> origin/main
   const fetchRegistrations = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
